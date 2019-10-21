@@ -9,7 +9,7 @@ Perl 6 daemon to slurp netXML files and parse the data into a PostgreSQL databas
 ### Zef modules
 
 ```
-zef install XML DB::Pg JSON::Fast
+zef install XML DB::Pg JSON::Fast Terminal::ANSIColor
 ```
 
 ## Configuration

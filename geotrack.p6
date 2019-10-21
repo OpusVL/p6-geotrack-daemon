@@ -1,6 +1,7 @@
 use OpusVL::Geotrack::Configuration;
 use OpusVL::Geotrack::Persistence::PostgreSQL;
 
+use Terminal::ANSIColor;
 use XML;
 
 my $configuration-handler = OpusVL::Geotrack::Configuration.new;
@@ -9,9 +10,13 @@ my %configuration = $configuration-handler.configuration;
 my $psql = OpusVL::Geotrack::Persistence::PostgreSQL.new(:dsn($configuration-handler.generate-dsn));
 
 sub MAIN {
+    say DateTime.now ~ " OpusVL::Geotrack is active and monitoring " ~ %configuration<geotrack-filepath> ~ ".";
+
     react {
         whenever %configuration<geotrack-filepath>.IO.watch -> $event {
-            harvest($event.path) if $event.event ~~ FileChanged and $event.path.IO.e;
+            if $event.IO.extension eq "netxml" {
+                harvest($event.path) if $event.event ~~ FileChanged and $event.path.IO.e;
+            }
         }
     }
 }
@@ -24,7 +29,7 @@ sub harvest($path) {
 
 sub parse(@wireless-clients, $path) {
     my $records = @wireless-clients.elems;
-    say "Parsing $path. $records total records found.";
+    say DateTime.now ~ " Parsing $path. $records total records found.";
 
     my $get = &value-of-tag.assuming($_);
 
@@ -59,6 +64,6 @@ sub reap(%client-data) {
 }
 
 sub expunge($path) {
-    say "Complete, removing $path.";
+    say DateTime.now ~ " Complete, removing $path.";
     unlink($path);
 }
