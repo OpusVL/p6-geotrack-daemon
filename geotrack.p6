@@ -13,7 +13,7 @@ sub MAIN {
     say DateTime.now ~ " OpusVL::Geotrack is active and monitoring " ~ %configuration<geotrack-filepath> ~ ".";
 
     react {
-        whenever %configuration<geotrack-filepath>.IO.watch -> $event {
+        whenever %configuration<geotrack-filepath>.IO.&watch-recursive -> $event {
             if $event.IO.extension eq "netxml" {
                 harvest($event.path) if $event.event ~~ FileChanged and $event.path.IO.e;
             }
@@ -57,6 +57,49 @@ sub parse(@wireless-clients, $path) {
 
 sub value-of-tag($xml, $tag-name) {
     $xml.lookfor(:TAG($tag-name), :SINGLE).firstChild.text;
+}
+
+sub watch-recursive(IO::Path $path) {
+    supply {
+        my %watched-dirs;
+
+        sub add-dir(IO::Path $dir, :$initial) {
+            %watched-dirs{$dir} = True;
+
+            with $dir.watch -> $dir-watch {
+                whenever $dir-watch {
+                    emit $_;
+                    my $path-io = .path.IO;
+                    if $path-io.d {
+                        unless $path-io.basename.starts-with('.') {
+                            add-dir($path-io) unless %watched-dirs{$path-io};
+                        }
+                    }
+                    CATCH {
+                        default {
+                            # Perhaps the directory went away; disregard.
+                        }
+                    }
+                }
+            }
+
+            for $dir.dir {
+                unless $initial {
+                    emit IO::Notification::Change.new(
+                            path => ~$_,
+                            event => FileChanged
+                            );
+                }
+                if .d {
+                    unless .basename.starts-with('.') {
+                        add-dir($_, :$initial);
+                    }
+                }
+            }
+        }
+
+        add-dir($path, :initial);
+    }
 }
 
 sub reap(%client-data) {
