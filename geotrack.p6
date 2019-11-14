@@ -36,7 +36,7 @@ sub parse(@wireless-clients, $path) {
     for @wireless-clients {
         my %client-data = client => $_.lookfor(:TAG('client-mac'), :SINGLE).firstChild.text,
                           client-manuf => $_.lookfor(:TAG('client-manuf'), :SINGLE).firstChild.text,
-                          access-point => %configuration<access-point> || %*ENV<GEOTRACK_ACCESS_POINT>,
+                          access-point => $path.IO.dirname.IO.basename,
                           last-signal-dbm => $_.lookfor(:TAG('last_signal_dbm'), :SINGLE).firstChild.text,
                           last-noise-dbm => $_.lookfor(:TAG('last_noise_dbm'), :SINGLE).firstChild.text,
                           last-signal-rssi => $_.lookfor(:TAG('last_signal_rssi'), :SINGLE).firstChild.text,

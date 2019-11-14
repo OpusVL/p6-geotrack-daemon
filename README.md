@@ -21,16 +21,16 @@ CREATE DATABASE geotrack;
 CREATE EXTENSION postgis;
 
 CREATE TABLE "access-points" (
-    id serial,
-    name text,
+    name text NOT NULL,
+    description text,
     location geography(POINT),
-    PRIMARY KEY (id)
+    PRIMARY KEY (name, location)
 );
 
 CREATE TABLE "client-data" (
     client text NOT NULL,
     "client-manufacturer" text DEFAULT NULL,
-    "access-point" int NOT NULL,
+    "access-point" text NOT NULL,
     "last-signal-dbm" int,
     "last-noise-dbm" int,
     "last-signal-rssi" int,
@@ -44,7 +44,7 @@ CREATE TABLE "client-data" (
     "max-signal-rssi" int,
     "max-noise-rssi" int,
     timestamp timestamptz NOT NULL,
-    FOREIGN KEY ("access-point") REFERENCES "access-points"(id)
+    FOREIGN KEY ("access-point") REFERENCES "access-points"(name)
 );
 ```
 ### Access Points
@@ -59,5 +59,5 @@ geotrack=# SELECT ST_GeometryFromText('POINT(52.3710507 -1.264331)', 4326);
 ```
 With this information, we can now add our new access point.
 ```sql
-INSERT INTO "access-points" VALUES (1, 'OpusVL Office Wifi', '0101000020E610000036D4DE967E2F4A40871A8524B33AF4BF');
+INSERT INTO "access-points" VALUES ('opusvlwifi', 'OpusVL Office Wifi', '0101000020E610000036D4DE967E2F4A40871A8524B33AF4BF');
 ```

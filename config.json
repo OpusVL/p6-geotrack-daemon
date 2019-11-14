@@ -1,6 +1,5 @@
 {
   "geotrack-filepath": "/srv/data1/",
-  "access-point": 1,
   "postgresql-host": "127.0.0.1",
   "postgresql-port": 5432,
   "postgresql-user": "geotrack",
