@@ -24,7 +24,7 @@ CREATE TABLE "access-points" (
     name text NOT NULL,
     description text,
     location geography(POINT),
-    PRIMARY KEY (name, location)
+    PRIMARY KEY (name)
 );
 
 CREATE TABLE "client-data" (
